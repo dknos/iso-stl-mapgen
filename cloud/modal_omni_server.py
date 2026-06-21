@@ -4,8 +4,8 @@ to MATCH the LoRA's training arch (qwen_image_edit_plus). LoRA in volume.
 
 Deploy:
   modal volume create isometric-lora-vol            # once
-  modal volume put isometric-lora-vol <local.safetensors> /loras/iso-stl-omni/iso_stl_omni_v1.safetensors
-  LORA_MODEL_ID=iso-stl-omni LORA_WEIGHT_NAME=iso_stl_omni_v1.safetensors modal deploy cloud/modal_omni_server.py
+  modal volume put isometric-lora-vol <local.safetensors> /loras/iso-stl-omni/iso_stl_omni_v4_3000.safetensors
+  LORA_MODEL_ID=iso-stl-omni LORA_WEIGHT_NAME=iso_stl_omni_v4_3000.safetensors modal deploy cloud/modal_omni_server.py
 """
 import base64, os, random
 from io import BytesIO
@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 DEFAULT_LORA_MODEL_ID = "iso-stl-omni"
 LORA_MODEL_ID = os.environ.get("LORA_MODEL_ID", DEFAULT_LORA_MODEL_ID)
-LORA_WEIGHT_NAME = os.environ.get("LORA_WEIGHT_NAME", "iso_stl_omni_v1.safetensors")
+LORA_WEIGHT_NAME = os.environ.get("LORA_WEIGHT_NAME", "iso_stl_omni_v4_3000.safetensors")
 
 image = modal.Image.debian_slim(python_version="3.11").pip_install(
     "torch", "torchvision", "diffusers>=0.35.0", "transformers>=4.46",

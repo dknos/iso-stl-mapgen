@@ -49,7 +49,7 @@ class PackedEditor:
             p = QwenImageEditPlusPipeline.from_pretrained(
                 "Qwen/Qwen-Image-Edit-2509", torch_dtype=torch.bfloat16)
             p.load_lora_weights("/data/loras/iso-stl-omni", adapter_name="iso",
-                                weight_name="iso_stl_omni_v1.safetensors")
+                                weight_name="iso_stl_omni_v4_3000.safetensors")
             p.set_adapters(["iso"], adapter_weights=[1.0])
             p.to("cuda"); p.set_progress_bar_config(disable=True)
             self.pipes.append(p)

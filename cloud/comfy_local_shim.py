@@ -16,7 +16,7 @@ VVRAM   = float(os.environ.get("SHIM_VVRAM", "6.0"))   # GB of DiT offloaded 508
 UNET    = "Qwen-Image-Edit-2509-Q4_K_M.gguf"
 CLIP    = "Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf"
 VAE     = "qwen_image_vae.safetensors"
-LORA    = os.environ.get("SHIM_LORA", "iso_stl_omni_v1_2000.safetensors")
+LORA    = os.environ.get("SHIM_LORA", "iso_stl_omni_v4_3000.safetensors")
 _ctr = [0]; _lock = threading.Lock()
 
 def build(img_name, prompt, steps, cfg, seed):

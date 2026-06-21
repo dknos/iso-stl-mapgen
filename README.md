@@ -31,7 +31,7 @@ The LoRA adapters are ~563 MB each and ship as **Release assets** (not in the gi
 
 | Asset | Use |
 |-------|-----|
-| `iso_stl_omni_v1_2000.safetensors` | **Default.** The generalized "omni" LoRA — best for styling *new* areas. |
+| `iso_stl_omni_v4_3000.safetensors` | **Default.** The generalized "omni" LoRA — best for styling *new* areas. |
 | `iso_stl_diorama_v1.safetensors` | Tuned to match the existing downtown St. Louis style (for seamless infill of already-styled regions). |
 
 Download from the [latest release](../../releases/latest) and pass the path with `--lora`.
@@ -53,7 +53,7 @@ pip install torch diffusers transformers pillow numpy safetensors
 python scripts/infer_batched.py \
   --grid-dir ./raw_tiles \
   --out-dir ./styled_tiles \
-  --lora iso_stl_omni_v1_2000.safetensors \
+  --lora iso_stl_omni_v4_3000.safetensors \
   --steps 20 --lora-scale 1.0
 ```
 
@@ -63,7 +63,7 @@ Deploy your **own** endpoint (you never use anyone else's — that's the point):
 ```bash
 pip install modal && modal token new
 modal volume create isometric-lora-vol
-modal volume put isometric-lora-vol iso_stl_omni_v1_2000.safetensors /loras/iso-stl-omni/iso_stl_omni_v1.safetensors
+modal volume put isometric-lora-vol iso_stl_omni_v4_3000.safetensors /loras/iso-stl-omni/iso_stl_omni_v4_3000.safetensors
 LORA_MODEL_ID=iso-stl-omni modal deploy cloud/modal_omni_server.py
 # Modal prints your endpoint URL. Use it:
 export EP=https://<you>--qwen-edit-stl-omni-imageeditor-edit-b64.modal.run
@@ -75,7 +75,7 @@ python scripts/walk_grid_rect.py --cols 6 --rows 6 --tiles ./raw_tiles --endpoin
 ### RunPod
 ```bash
 echo "RUNPOD_API_KEY=..." > ~/.iso_runpod_env
-python cloud/runpod_infer.py --tiles raw_tiles.tgz --lora iso_stl_omni_v1_2000.safetensors --out ./styled
+python cloud/runpod_infer.py --tiles raw_tiles.tgz --lora iso_stl_omni_v4_3000.safetensors --out ./styled
 ```
 
 ### Lambda / any rented H100
@@ -103,9 +103,9 @@ Tiles are named `tile_C_R.png` (column, row), 1024×1024 PNG. Output keeps the s
 
 ## Submitting styled tiles
 
-Open a pull request adding your styled `tile_C_R.png` under a `submissions/<region>/` folder,
-**or** drop a zip in the project Discord. The maintainer verifies style consistency before
-stitching into the live map. (Intake is being finalized — open an issue if unsure.)
+Open a pull request adding your styled `tile_C_R.png` files under `submissions/<region>/`.
+The maintainer reviews style consistency on the PR before stitching them into the live map.
+In the PR description, note the source tile-pack and which LoRA / step count you used.
 
 ---
 
