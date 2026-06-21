@@ -1,0 +1,64 @@
+---
+# Qwen-Image-Edit-2509 control LoRA — CLOUD (RunPod 48GB+ : A6000 / L40S / A100 / H100).
+# qfloat8 quant (near-lossless, fits 48GB; on 80GB you may set quantize:false for full bf16).
+# No low_vram offload (plenty of VRAM) => fast steps. Multi-resolution incl 1024.
+job: extension
+config:
+  name: "iso_stl_diorama_v1"
+  process:
+    - type: 'diffusion_trainer'
+      training_folder: "/workspace/output"
+      device: cuda:0
+      network:
+        type: "lora"
+        linear: 32          # cloud has VRAM headroom: rank 32 for more style capacity
+        linear_alpha: 32
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 4
+      datasets:
+        - folder_path: "/workspace/dataset/style"
+          control_path:
+            - "/workspace/dataset/raw"
+          caption_ext: "txt"
+          caption_dropout_rate: 0.05
+          resolution: [ 512, 768, 1024 ]
+      train:
+        batch_size: 1
+        cache_text_embeddings: true
+        steps: 2000
+        gradient_accumulation: 1
+        timestep_type: "weighted"
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        lr: 1e-4
+        dtype: bf16
+      model:
+        name_or_path: "Qwen/Qwen-Image-Edit-2509"
+        arch: "qwen_image_edit_plus"
+        # H100 80GB: FULL bf16, no quant — best LoRA quality + fastest.
+        # (For a 48GB card instead: set quantize:true + qtype:qfloat8 + quantize_te:true.)
+        quantize: false
+        # low_vram NOT set => no CPU offload => fast
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        width: 1024
+        height: 1024
+        samples:
+          - prompt: "convert this aerial photograph into a detailed isometric 3D diorama city render, tilt-shift miniature, vivid saturated colors, clean crisp buildings, bright green grass, clean blue water, keeping the exact same layout and geometry"
+            ctrl_img_1: "/workspace/dataset/raw/grok_tile_2_2.png"
+          - prompt: "convert this aerial photograph into a detailed isometric 3D diorama city render, tilt-shift miniature, vivid saturated colors, clean crisp buildings, bright green grass, clean blue water, keeping the exact same layout and geometry"
+            ctrl_img_1: "/workspace/dataset/raw/nano_tile_1_1.png"
+        neg: "photographic, photo, blurry, hazy, text, watermark, border"
+        seed: 42
+        walk_seed: true
+        guidance_scale: 3
+        sample_steps: 25
+meta:
+  name: "[name]"
+  version: '1.0'

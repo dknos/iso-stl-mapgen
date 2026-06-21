@@ -1,0 +1,67 @@
+---
+# Qwen-Image-Edit-2509 control LoRA — STL aerial -> detailed-3D diorama.
+# Tuned for a single 16GB card (RTX 5080): uint3 ARA quant + qfloat8 TE +
+# low_vram + unload_text_encoder + gradient checkpointing. Drop resolution to
+# [512,768] if it OOMs at 1024.
+job: extension
+config:
+  name: "iso_stl_diorama_v1"
+  process:
+    - type: 'diffusion_trainer'
+      training_folder: "/home/nemoclaw/iso-stl-lora/output"
+      device: cuda:0
+      network:
+        type: "lora"
+        linear: 8           # 16GB: shave LoRA weights/grads/optimizer to clear the ~150MB OOM
+        linear_alpha: 8
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 4
+      datasets:
+        - folder_path: "/home/nemoclaw/iso-stl-lora/dataset/style"
+          control_path:
+            - "/home/nemoclaw/iso-stl-lora/dataset/raw"
+          caption_ext: "txt"
+          caption_dropout_rate: 0.05
+          resolution: [ 512 ]   # 16GB: 768+ OOMs at step; 512 trains, upscale at inference
+      train:
+        batch_size: 1
+        cache_text_embeddings: true
+        unload_text_encoder: true          # 16GB: free the TE after caching
+        steps: 2000
+        gradient_accumulation: 1
+        timestep_type: "weighted"
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        lr: 1e-4
+        dtype: bf16
+      model:
+        name_or_path: "Qwen/Qwen-Image-Edit-2509"
+        arch: "qwen_image_edit_plus"
+        quantize: true
+        qtype: "uint3"   # plain uint3, NO ARA adapter — saves its resident fp16 weights to fit 16GB (expandable_segments unusable on Blackwell/cu130)
+        quantize_te: true
+        qtype_te: "qfloat8"
+        low_vram: true
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        width: 1024
+        height: 1024
+        samples:
+          - prompt: "convert this aerial photograph into a detailed isometric 3D diorama city render, tilt-shift miniature, vivid saturated colors, clean crisp buildings, bright green grass, clean blue water, keeping the exact same layout and geometry"
+            ctrl_img_1: "/home/nemoclaw/iso-stl-lora/dataset/raw/final2_tile_0_1.png"
+          - prompt: "convert this aerial photograph into a detailed isometric 3D diorama city render, tilt-shift miniature, vivid saturated colors, clean crisp buildings, bright green grass, clean blue water, keeping the exact same layout and geometry"
+            ctrl_img_1: "/home/nemoclaw/iso-stl-lora/dataset/raw/final2_tile_3_0.png"
+        neg: "photographic, photo, blurry, hazy, text, watermark, border"
+        seed: 42
+        walk_seed: true
+        guidance_scale: 3
+        sample_steps: 25
+meta:
+  name: "[name]"
+  version: '1.0'

@@ -1,0 +1,61 @@
+---
+# Qwen-Image-Edit-2509 OMNI INFILL LoRA (cannoneyed method) — CLOUD B200/H100 (full bf16).
+# control = infill TEMPLATE (render in red box + already-generated context), target = clean
+# teacher gen. Trains the model to seamlessly fill the red region matching its surroundings.
+job: extension
+config:
+  name: "iso_stl_omni_v1"
+  process:
+    - type: 'diffusion_trainer'
+      training_folder: "/workspace/output"
+      device: cuda:0
+      network:
+        type: "lora"
+        linear: 32
+        linear_alpha: 32
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 4
+      datasets:
+        - folder_path: "/workspace/dataset/omni_v1/target"
+          control_path:
+            - "/workspace/dataset/omni_v1/control"
+          caption_ext: "txt"
+          caption_dropout_rate: 0.05
+          resolution: [ 768, 1024 ]
+      train:
+        batch_size: 1
+        cache_text_embeddings: true
+        steps: 2500
+        gradient_accumulation: 1
+        timestep_type: "weighted"
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw"   # not 8bit: avoids bitsandbytes on Blackwell; B200/B300 have VRAM to spare
+        lr: 1e-4
+        dtype: bf16
+      model:
+        name_or_path: "Qwen/Qwen-Image-Edit-2509"
+        arch: "qwen_image_edit_plus"
+        quantize: false
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        width: 1024
+        height: 1024
+        samples:
+          - prompt: "Fill in the red-outlined region with the missing pixels in the <isometric st louis pixel art> isometric 3D city diorama style, removing the red border and exactly following the color, shape, and structure of the surrounding already-generated image so the result is seamless."
+            ctrl_img_1: "/workspace/dataset/omni_v1/control/tile_0_0_00_full.png"
+          - prompt: "Fill in the red-outlined region with the missing pixels in the <isometric st louis pixel art> isometric 3D city diorama style, removing the red border and exactly following the color, shape, and structure of the surrounding already-generated image so the result is seamless."
+            ctrl_img_1: "/workspace/dataset/omni_v1/control/tile_0_0_01_half.png"
+        neg: "blurry, hazy, photograph, text, watermark, red border, seam"
+        seed: 42
+        walk_seed: true
+        guidance_scale: 3
+        sample_steps: 25
+meta:
+  name: "[name]"
+  version: '1.0'

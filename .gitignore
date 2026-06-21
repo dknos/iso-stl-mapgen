@@ -1,0 +1,32 @@
+# model weights ship as GitHub Release assets, never git-tracked
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+*.gguf
+
+# data / outputs / tiles
+*.tar.gz
+*.png
+*.jpg
+*.jpeg
+out/
+output/
+styled_tiles/
+raw_tiles/
+submissions/**/*.png
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# secrets / local env — never commit
+.env
+*_env
+.iso_runpod_env
+secrets/
+*sa.json
+*service-account*.json
+*.token
