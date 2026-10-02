@@ -1,13 +1,13 @@
 # Security
 
-This repository is the public way to generate tiles for the St. Louis isometric map. The live site, deploy keys, and aerial-capture key stay with the maintainer.
+This repository is the public way to generate tiles for the St. Louis isometric map. The live site and deploy keys stay with the maintainer. Capture uses your own Google 3D Tiles key.
 
 ## Do not commit
 
 - RunPod, Modal, Hugging Face, Cloudflare, or Google API keys
 - `.env`, `~/.iso_runpod_env`, private keys, or service-account JSON
 - LoRA or base-model weights (those stay on the GitHub Release and on Hugging Face)
-- The Google 3D Tiles capture rig
+- Your Google 3D Tiles key. Capture raw tiles the way [Isometric NYC](https://cannoneyed.com/projects/isometric-nyc) describes, and leave the key on your machine.
 
 `cloud/runpod_*.py` reads `RUNPOD_API_KEY` from `~/.iso_runpod_env` on your machine. That file is gitignored. `HF_TOKEN` is an environment variable, never a file in this repo.
 

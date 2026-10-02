@@ -1,6 +1,6 @@
 ## Region
 
-<!-- Name the tile pack and the submissions/<region>/ folder. -->
+<!-- Name the region, the submissions/<region>/ folder, and the column/row range you captured. -->
 
 ## How it was generated
 

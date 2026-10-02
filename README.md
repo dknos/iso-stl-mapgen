@@ -23,21 +23,25 @@ How to submit tiles is in [CONTRIBUTING.md](CONTRIBUTING.md). What must stay off
 | LoRA for downtown infill | [iso_stl_diorama_v1.safetensors](https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_diorama_v1.safetensors) |
 | Both LoRAs | [v1.0 release](https://github.com/dknos/iso-stl-mapgen/releases/tag/v1.0) |
 | Stitcher | [`scripts/stitch.mjs`](scripts/stitch.mjs) |
+| How to capture raw tiles | [Isometric NYC writeup](https://cannoneyed.com/projects/isometric-nyc) |
+| Isometric NYC map | https://cannoneyed.com/isometric-nyc/ |
 
 ---
 
-## The contribution model: you-capture / they-style
+## Getting the raw tiles
 
-The raw aerial capture needs a Google 3D-Tiles key and a capture rig — that part stays
-with the maintainer. **You only run the style pass**, which needs neither.
+Raw tiles are your own 1024×1024 orthographic captures, named `tile_C_R.png`.
+The capture method is the one written up for Isometric NYC:
 
-1. **Maintainer** publishes a *tile pack*: a folder of raw `tile_C_R.png` (1024×1024) for a
-   region that isn't styled yet, plus the LoRA weights (see Releases).
-2. **You** run the LoRA style pass on your GPU or cloud account → styled tiles.
-3. **You** submit the styled tiles back (see *Submitting* below). The maintainer runs the
-   shared finishing/water/stitch pass so the whole map stays consistent.
+- [cannoneyed.com/projects/isometric-nyc](https://cannoneyed.com/projects/isometric-nyc) — how the raw tiles are made. Render them from the Google Maps 3D Tiles API with an orthographic camera, one square per tile.
+- [cannoneyed.com/isometric-nyc](https://cannoneyed.com/isometric-nyc/) — the finished NYC map those tiles became.
 
-No Google key, no HuggingFace gating beyond the base model, no private data needed.
+You use your own Google key for that capture. Do not commit the key or the raw captures.
+This repo then styles those captures with the St. Louis LoRA and stitches them.
+
+1. Capture a region as `tile_C_R.png` files, using the writeup above.
+2. Run the LoRA style pass on your GPU or cloud account.
+3. Submit the styled tiles (see *Submitting* below). The maintainer runs the shared finishing pass before anything reaches the live map.
 
 ---
 
@@ -127,7 +131,7 @@ Tiles are named `tile_C_R.png` (column, row), 1024×1024 PNG. Output keeps the s
 Open a pull request adding your styled `tile_C_R.png` files under `submissions/<region>/`.
 Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The maintainer reviews style consistency on
 the PR before stitching them into the [live traffic map](https://stlcity2000.com/iso-map/corridor-traffic-fp).
-In the PR description, note the source tile-pack and which LoRA / step count you used.
+In the PR description, note the column and row range you captured and which LoRA / step count you used.
 Do not include API keys, the Modal URL, or the `ISO_EDIT_TOKEN`.
 
 ---

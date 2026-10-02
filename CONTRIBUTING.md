@@ -4,7 +4,7 @@ The live map is the isometric corridor traffic map:
 
 https://stlcity2000.com/iso-map/corridor-traffic-fp
 
-You style a pack of raw aerial tiles and send the styled tiles back in a pull request. You do not deploy the site, and you do not need the Google 3D Tiles key.
+Capture your own raw tiles, style them, and send the styled tiles back in a pull request. You do not deploy the site.
 
 ## Weights and tools
 
@@ -17,6 +17,8 @@ You style a pack of raw aerial tiles and send the styled tiles back in a pull re
 | VAE and mmproj | same QuantStack repo (`qwen_image_vae.safetensors`, `Qwen2.5-VL-7B-Instruct-mmproj-BF16.gguf`) |
 | LoRA, new areas | https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_omni_v4_3000.safetensors |
 | LoRA, downtown infill | https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_diorama_v1.safetensors |
+| How to capture raw tiles | https://cannoneyed.com/projects/isometric-nyc |
+| Isometric NYC map | https://cannoneyed.com/isometric-nyc/ |
 | Stitcher | [`scripts/stitch.mjs`](scripts/stitch.mjs) |
 | Style pass | [`scripts/infer_batched.py`](scripts/infer_batched.py) |
 | Seam-free walk | [`scripts/walk_grid_rect.py`](scripts/walk_grid_rect.py) |
@@ -25,9 +27,11 @@ The release page with both LoRAs is https://github.com/dknos/iso-stl-mapgen/rele
 
 Use `iso_stl_omni_v4_3000` for a region that is not styled yet. Use `iso_stl_diorama_v1` only when you are filling a hole in the downtown style.
 
-## Style a tile pack
+## Capture, then style
 
-The maintainer publishes a folder of raw `tile_C_R.png` files (1024×1024). Ask in an issue if you need a pack. Then:
+Make the raw `tile_C_R.png` files yourself, 1024×1024, the way the [Isometric NYC writeup](https://cannoneyed.com/projects/isometric-nyc) describes: an orthographic render of Google Maps 3D Tiles. The finished NYC map is at [cannoneyed.com/isometric-nyc](https://cannoneyed.com/isometric-nyc/). Use your own Google key, and do not commit it or the raw captures.
+
+Then style the folder:
 
 ```bash
 pip install torch diffusers transformers pillow numpy safetensors
@@ -56,6 +60,6 @@ mkdir -p submissions/my-region
 cp styled_tiles/tile_*.png submissions/my-region/
 ```
 
-Add `submissions/my-region/NOTES.md` with the tile pack name, the LoRA filename, the step count, and the command. Open a pull request. One region per pull request, about 50 tiles or fewer.
+Add `submissions/my-region/NOTES.md` with the column and row range you captured, the LoRA filename, the step count, and the command. Open a pull request. One region per pull request, about 50 tiles or fewer.
 
 The maintainer checks that the style matches, then runs the shared finishing and stitch pass. Nothing in a pull request is deployed automatically.

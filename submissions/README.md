@@ -8,7 +8,7 @@ submissions/<region-name>/tile_1_0.png
 submissions/<region-name>/NOTES.md
 ```
 
-`NOTES.md` should name the tile pack you started from, the LoRA file, the step count, and the command you ran.
+`NOTES.md` should name the column and row range you captured, the LoRA file, the step count, and the command you ran.
 
 Rules:
 
