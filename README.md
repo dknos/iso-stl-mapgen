@@ -1,12 +1,28 @@
 # iso-stl-mapgen
 
-Tools to generate the **isometric 3D diorama map tiles** behind the iso-map at
-[stl-radar.com](https://stl-radar.com) — and a way to **contribute GPU compute** to extend it.
+Tools to generate the **isometric 3D diorama map tiles** behind the corridor traffic map at
+[stlcity2000.com/iso-map/corridor-traffic-fp](https://stlcity2000.com/iso-map/corridor-traffic-fp),
+and a way to **contribute GPU compute** to extend it.
 
 The map is built by taking ortho aerial captures of St. Louis and restyling each tile
 into a low-poly toy-diorama look with a trained **Qwen-Image-Edit LoRA**. Generating a
 city is GPU-heavy, so this repo lets anyone with a GPU (local) or a cloud account
 (Modal / RunPod / Lambda) style a batch of tiles and send them back.
+
+How to submit tiles is in [CONTRIBUTING.md](CONTRIBUTING.md). What must stay off GitHub is in [SECURITY.md](SECURITY.md).
+
+## Links
+
+| Piece | Where |
+| --- | --- |
+| Live traffic map | https://stlcity2000.com/iso-map/corridor-traffic-fp |
+| Base model | https://huggingface.co/Qwen/Qwen-Image-Edit-2509 |
+| GGUF quant (ComfyUI, 16 GB) | https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF (`Qwen-Image-Edit-2509-Q4_K_M.gguf`) |
+| Text encoder / VAE / mmproj | [QuantStack README](https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF) and [unsloth Qwen2.5-VL-7B GGUF](https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF) |
+| LoRA for new areas | [iso_stl_omni_v4_3000.safetensors](https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_omni_v4_3000.safetensors) |
+| LoRA for downtown infill | [iso_stl_diorama_v1.safetensors](https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_diorama_v1.safetensors) |
+| Both LoRAs | [v1.0 release](https://github.com/dknos/iso-stl-mapgen/releases/tag/v1.0) |
+| Stitcher | [`scripts/stitch.mjs`](scripts/stitch.mjs) |
 
 ---
 
@@ -62,13 +78,16 @@ Deploy your **own** endpoint (you never use anyone else's — that's the point):
 
 ```bash
 pip install modal && modal token new
+export ISO_EDIT_TOKEN=$(openssl rand -hex 24)   # keep this private; the server refuses to deploy without it
 modal volume create isometric-lora-vol
 modal volume put isometric-lora-vol iso_stl_omni_v4_3000.safetensors /loras/iso-stl-omni/iso_stl_omni_v4_3000.safetensors
 LORA_MODEL_ID=iso-stl-omni modal deploy cloud/modal_omni_server.py
-# Modal prints your endpoint URL. Use it:
+# Modal prints your endpoint URL. Do not commit it. Use it:
 export EP=https://<you>--qwen-edit-stl-omni-imageeditor-edit-b64.modal.run
 python scripts/walk_grid_rect.py --cols 6 --rows 6 --tiles ./raw_tiles --endpoint "$EP" --out region.png
 ```
+
+`walk_grid_rect.py` sends `ISO_EDIT_TOKEN` with each request. The endpoint bills your Modal account, so leave the URL and the token off GitHub, Discord, and the pull request.
 
 `$30` of B200 credit styles a lot of tiles (roughly $0.50–1.50 per region).
 
@@ -94,8 +113,10 @@ The map is regenerated *in place* tile-by-tile so you never re-render the whole 
 - **`scripts/regen_region.py`** / **`scripts/fix_region.py`** — re-style one bad region of a
   finished map (sources the raw geometry into a red box, infills through your endpoint,
   feather-pastes it back). Set `EP` to your Modal endpoint.
+- **`scripts/stitch.mjs`** — stitch `tile_C_R.png` files into one preview PNG. Needs `npm install sharp`.
 - **`scripts/water_fix.py`**, **`scripts/finishing_pass.py`**, **`scripts/make_dzi.py`**,
   **`scripts/stitch_deploy.py`** — the maintainer's finishing/water/stitch/deep-zoom pass.
+  These are not run by pull requests.
 
 Tiles are named `tile_C_R.png` (column, row), 1024×1024 PNG. Output keeps the same names.
 
@@ -104,8 +125,10 @@ Tiles are named `tile_C_R.png` (column, row), 1024×1024 PNG. Output keeps the s
 ## Submitting styled tiles
 
 Open a pull request adding your styled `tile_C_R.png` files under `submissions/<region>/`.
-The maintainer reviews style consistency on the PR before stitching them into the live map.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The maintainer reviews style consistency on
+the PR before stitching them into the [live traffic map](https://stlcity2000.com/iso-map/corridor-traffic-fp).
 In the PR description, note the source tile-pack and which LoRA / step count you used.
+Do not include API keys, the Modal URL, or the `ISO_EDIT_TOKEN`.
 
 ---
 

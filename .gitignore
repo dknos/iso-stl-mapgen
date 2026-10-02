@@ -10,11 +10,13 @@
 *.png
 *.jpg
 *.jpeg
+# Contributed tiles are the one exception. Everything else stays local.
+!submissions/**/*.png
 out/
 output/
 styled_tiles/
 raw_tiles/
-submissions/**/*.png
+node_modules/
 
 # python
 __pycache__/

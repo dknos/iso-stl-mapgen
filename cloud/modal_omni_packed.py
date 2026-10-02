@@ -6,10 +6,15 @@ before committing to the full-city walk.
 Deploy:  modal deploy cloud/modal_omni_packed.py
 Endpoint: https://<your-modal-username>--qwen-edit-packed-packededitor-edit-b64.modal.run
 """
-import asyncio, base64, os, random
+import asyncio, base64, hmac, os, random
 from io import BytesIO
 import modal
+from fastapi import HTTPException
 from pydantic import BaseModel
+
+EDIT_TOKEN = os.environ.get("ISO_EDIT_TOKEN", "")
+if len(EDIT_TOKEN) < 16:
+    raise SystemExit("Refusing to deploy: set ISO_EDIT_TOKEN to at least 16 characters (openssl rand -hex 24).")
 
 N_COPIES = int(os.environ.get("N_COPIES", "3"))   # full model copies on one GPU
 PACK_GPU = os.environ.get("PACK_GPU", "B200")     # B200(192GB)~3-4, B300(288GB)~5-6
@@ -31,9 +36,17 @@ class EditRequest(BaseModel):
     steps: int = 16
     guidance_scale: float = 3.0
     seed: int | None = None
+    token: str | None = None
+
+
+def require_token(req: EditRequest):
+    got = req.token or ""
+    if len(got) != len(EDIT_TOKEN) or not hmac.compare_digest(got, EDIT_TOKEN):
+        raise HTTPException(status_code=401, detail="unauthorized")
 
 
 @app.cls(image=image, gpu=PACK_GPU, volumes={"/data": lora_volume},
+         secrets=[modal.Secret.from_dict({"ISO_EDIT_TOKEN": EDIT_TOKEN})],
          max_containers=1,                      # force ONE GPU -> true packing measurement
          scaledown_window=120, timeout=1800)
 @modal.concurrent(max_inputs=N_COPIES)          # one container handles N concurrent inputs
@@ -61,6 +74,7 @@ class PackedEditor:
 
     @modal.fastapi_endpoint(method="POST")
     async def edit_b64(self, req: EditRequest):
+        require_token(req)
         import torch
         from PIL import Image
         pipe = await self.pool.get()                 # grab a free copy

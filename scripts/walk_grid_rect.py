@@ -23,9 +23,14 @@ Q = 512
 
 def call(ep, img, prompt, seed, steps=14, guidance=3.0, true_cfg=1.0):  # CFG OFF = half compute, same look
     b = io.BytesIO(); img.save(b, "PNG")
-    body = json.dumps({"image_b64": base64.b64encode(b.getvalue()).decode(), "prompt": prompt,
-                       "steps": steps, "guidance_scale": guidance,
-                       "true_cfg_scale": true_cfg, "seed": seed}).encode()
+    payload = {"image_b64": base64.b64encode(b.getvalue()).decode(), "prompt": prompt,
+               "steps": steps, "guidance_scale": guidance,
+               "true_cfg_scale": true_cfg, "seed": seed}
+    # Modal endpoints require this. A local Comfy shim ignores the extra field.
+    token = os.environ.get("ISO_EDIT_TOKEN", "")
+    if token:
+        payload["token"] = token
+    body = json.dumps(payload).encode()
     for att in range(8):
         try:
             r = json.load(urllib.request.urlopen(urllib.request.Request(
