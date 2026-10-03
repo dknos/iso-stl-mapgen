@@ -17,7 +17,7 @@ How to submit tiles is in [CONTRIBUTING.md](CONTRIBUTING.md). What must stay off
 | --- | --- |
 | Live traffic map | https://stlcity2000.com/iso-map/corridor-traffic-fp |
 | Base model | https://huggingface.co/Qwen/Qwen-Image-Edit-2509 |
-| GGUF quant (ComfyUI, 16 GB) | https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF (`Qwen-Image-Edit-2509-Q4_K_M.gguf`) |
+| GGUF quant (ComfyUI) | https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF (`Qwen-Image-Edit-2509-Q6_K.gguf`) |
 | Text encoder / VAE / mmproj | [QuantStack README](https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF) and [unsloth Qwen2.5-VL-7B GGUF](https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF) |
 | LoRA for new areas | [iso_stl_omni_v4_3000.safetensors](https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_omni_v4_3000.safetensors) |
 | LoRA for downtown infill | [iso_stl_diorama_v1.safetensors](https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_diorama_v1.safetensors) |
@@ -58,15 +58,15 @@ Download from the [latest release](../../releases/latest) and pass the path with
 
 The **base model** is `Qwen/Qwen-Image-Edit-2509` (~20B). It downloads from HuggingFace on
 first run; you may need a HuggingFace account / `HF_TOKEN` to accept its license. The local
-ComfyUI path uses a GGUF quant of the same model (see `cloud/start_local_comfy.sh`).
+ComfyUI path uses `Qwen-Image-Edit-2509-Q6_K.gguf` (see `cloud/start_local_comfy.sh`).
 
 ---
 
 ## Run the style pass
 
 ### Local GPU (simplest, $0)
-A single NVIDIA card with enough VRAM (bf16 needs ~24 GB; an 8–16 GB card can use the
-quantized ComfyUI path in `cloud/`).
+A single NVIDIA card with enough VRAM (bf16 needs ~24 GB; the ComfyUI path in `cloud/`
+uses `Qwen-Image-Edit-2509-Q6_K.gguf` with 8 GB of CPU offload).
 
 ```bash
 pip install torch diffusers transformers pillow numpy safetensors

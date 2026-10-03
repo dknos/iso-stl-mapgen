@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start the LOCAL $0 iso-stl walk backend: ComfyUI (Qwen-Image-Edit-2509 GGUF + iso LoRA)
-# on the 5080 (+6GB CPU offload) with the VL text encoder on the 2080, plus the shim that
+# on the 5080 (Qwen-Image-Edit-2509-Q6_K, +8GB CPU offload) with the VL text encoder on the 2080, plus the shim that
 # speaks walk_grid_rect.py's HTTP interface.  Idempotent: skips anything already up.
 #
 # After this: walk_grid_rect.py --endpoint http://127.0.0.1:8195/edit ...
@@ -29,7 +29,7 @@ if is_up "$SHIM_PORT"; then
   echo "shim already up on :$SHIM_PORT"
 else
   echo "starting shim on :$SHIM_PORT ..."
-  SHIM_PORT="$SHIM_PORT" nohup python3 -u \
+  SHIM_PORT="$SHIM_PORT" SHIM_UNET="Qwen-Image-Edit-2509-Q6_K.gguf" SHIM_VVRAM=8 nohup python3 -u \
     /home/nemoclaw/iso-stl-lora/cloud/comfy_local_shim.py > /home/nemoclaw/_shim.log 2>&1 &
   sleep 3
   tail -1 /home/nemoclaw/_shim.log

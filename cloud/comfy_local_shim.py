@@ -12,17 +12,16 @@ COMFY   = os.environ.get("COMFY_URL", "http://127.0.0.1:8190")
 INPUT   = os.environ.get("COMFY_INPUT", "/home/nemoclaw/ComfyUI/input")
 PORT    = int(os.environ.get("SHIM_PORT", "8191"))
 CFG     = float(os.environ.get("SHIM_CFG", "2.5"))     # validated KSampler cfg for this LoRA
-VVRAM   = float(os.environ.get("SHIM_VVRAM", "6.0"))   # GB of DiT offloaded 5080->CPU
-UNET    = "Qwen-Image-Edit-2509-Q4_K_M.gguf"
+VVRAM   = float(os.environ.get("SHIM_VVRAM", "8.0"))   # GB of Q6 DiT offloaded 5080->CPU
+UNET    = "Qwen-Image-Edit-2509-Q6_K.gguf"
 CLIP    = "Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf"
 VAE     = "qwen_image_vae.safetensors"
 LORA    = os.environ.get("SHIM_LORA", "iso_stl_omni_v4_3000.safetensors")
 _ctr = [0]; _lock = threading.Lock()
 
 def build(img_name, prompt, steps, cfg, seed):
-    # 5080 freed (monitor->cpu) but ~3.5GB residual => ~12.8GB free, just under DiT-Q4 (13GB).
-    # DiT on cuda:0 with a SMALL CPU-offload buffer (no thrash); the 5GB VL encoder lives on
-    # the idle 2080 (cuda:1) so it never competes with the DiT (must re-encode every tile).
+    # Q6_K is ~16GB. 5080 has ~12.8GB free after residual, so offload 8GB to CPU.
+    # DiT on cuda:0; the 5GB VL encoder lives on the idle 2080 (cuda:1).
     return {
      "1":{"class_type":"UnetLoaderGGUFDisTorch2MultiGPU","inputs":{
           "unet_name":UNET,"compute_device":"cuda:0","virtual_vram_gb":VVRAM,

@@ -12,7 +12,7 @@ Capture your own raw tiles, style them, and send the styled tiles back in a pull
 | --- | --- |
 | Live map | https://stlcity2000.com/iso-map/corridor-traffic-fp |
 | Base model | https://huggingface.co/Qwen/Qwen-Image-Edit-2509 |
-| GGUF base (16 GB cards) | https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF — file `Qwen-Image-Edit-2509-Q4_K_M.gguf` |
+| GGUF base | https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF — file `Qwen-Image-Edit-2509-Q6_K.gguf` |
 | Text encoder GGUF | https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF |
 | VAE and mmproj | same QuantStack repo (`qwen_image_vae.safetensors`, `Qwen2.5-VL-7B-Instruct-mmproj-BF16.gguf`) |
 | LoRA, new areas | https://github.com/dknos/iso-stl-mapgen/releases/download/v1.0/iso_stl_omni_v4_3000.safetensors |
